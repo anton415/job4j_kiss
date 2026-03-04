@@ -10,7 +10,7 @@ public class Fool {
      * @return строка "Fizz", "Buzz", "FizzBuzz" или число в виде строки
      */
     static String value(int number) {
-        if (number % 15 == 0) {
+        if (number % 3 == 0 && number % 5 == 0) {
             return "FizzBuzz";
         }
         if (number % 3 == 0) {
