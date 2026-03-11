@@ -1,11 +1,13 @@
 package ru.job4j.ood.lsp.food;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class ControlQuality {
     private final List<Store> stores;
+    private final ShelfLifeCalculator shelfLifeCalculator = new ShelfLifeCalculator();
 
     public ControlQuality(List<Store> stores) {
         Objects.requireNonNull(stores, "stores must not be null");
@@ -17,7 +19,6 @@ public class ControlQuality {
 
     public void distribute(Food food) {
         Objects.requireNonNull(food, "food must not be null");
-        /* Контроллер ничего не знает о типах хранилищ: он просто пробует каждое по контракту Store. */
         for (Store store : stores) {
             if (store.add(food)) {
                 return;
@@ -28,7 +29,15 @@ public class ControlQuality {
 
     public void distribute(List<Food> foods) {
         Objects.requireNonNull(foods, "foods must not be null");
-        foods.forEach(this::distribute);
+        LocalDate currentDate = LocalDate.now();
+        foods.forEach(food -> shelfLifeCalculator.usagePercent(food, currentDate));
+        List<Food> undistributed = foods;
+        for (Store store : stores) {
+            undistributed = store.add(undistributed);
+        }
+        if (!undistributed.isEmpty()) {
+            throw new IllegalStateException("No store accepted food: " + undistributed.get(0).getName());
+        }
     }
 
     public void resort() {
@@ -36,7 +45,6 @@ public class ControlQuality {
         for (Store store : stores) {
             foods.addAll(store.extractAll());
         }
-        /* После очистки хранилищ распределяем продукты заново по актуальной дате. */
         distribute(foods);
     }
 }

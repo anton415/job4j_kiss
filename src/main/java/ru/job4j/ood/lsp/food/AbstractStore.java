@@ -8,8 +8,8 @@ import java.util.function.Supplier;
 
 public abstract class AbstractStore implements Store {
     private final List<Food> foods = new ArrayList<>();
-    /* Источник текущей даты вынесен отдельно, чтобы удобно тестировать граничные случаи. */
     private final Supplier<LocalDate> currentDateSupplier;
+    private final ShelfLifeCalculator shelfLifeCalculator = new ShelfLifeCalculator();
 
     protected AbstractStore() {
         this(LocalDate::now);
@@ -25,7 +25,6 @@ public abstract class AbstractStore implements Store {
         if (!accepts(food)) {
             return false;
         }
-        /* Перед сохранением наследник может изменить состояние продукта, например применить скидку. */
         prepare(food);
         foods.add(food);
         return true;
@@ -38,7 +37,6 @@ public abstract class AbstractStore implements Store {
 
     @Override
     public List<Food> extractAll() {
-        /* Нужен для повторной сортировки: забираем все продукты и очищаем текущее хранилище. */
         List<Food> extracted = new ArrayList<>(foods);
         foods.clear();
         return extracted;
@@ -49,10 +47,17 @@ public abstract class AbstractStore implements Store {
     }
 
     protected double usagePercent(Food food) {
-        return food.getShelfLifeUsagePercent(currentDate());
+        return shelfLifeCalculator.usagePercent(food, currentDate());
+    }
+
+    protected boolean isExpired(Food food) {
+        return shelfLifeCalculator.isExpired(food, currentDate());
+    }
+
+    protected boolean needsDiscount(Food food) {
+        return shelfLifeCalculator.needsDiscount(food, currentDate());
     }
 
     protected void prepare(Food food) {
-        /* По умолчанию продукт кладется как есть. */
     }
 }

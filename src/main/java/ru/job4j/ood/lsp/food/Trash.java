@@ -13,6 +13,6 @@ public class Trash extends AbstractStore {
 
     @Override
     public boolean accepts(Food food) {
-        return food.isExpired(currentDate());
+        return isExpired(food);
     }
 }

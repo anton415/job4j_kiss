@@ -1,7 +1,6 @@
 package ru.job4j.ood.lsp.food;
 
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 public class Food {
@@ -12,6 +11,8 @@ public class Food {
     private final double discount;
     private double price;
     private boolean discounted;
+    // поле для сохранения значения оставшегося срока годности
+    private long remainingShelfLife;
 
     public Food(String name, LocalDate expiryDate, LocalDate createDate, double price, double discount) {
         this.name = Objects.requireNonNull(name, "name must not be null");
@@ -55,33 +56,20 @@ public class Food {
         return originalPrice;
     }
 
+    public long getRemainingShelfLife() {
+        return remainingShelfLife;
+    }
+
     public boolean isDiscounted() {
         return discounted;
     }
 
-    public double getShelfLifeUsagePercent(LocalDate currentDate) {
-        Objects.requireNonNull(currentDate, "currentDate must not be null");
-        if (currentDate.isBefore(createDate)) {
-            return 0D;
-        }
-        /* Процент считаем по отношению уже прошедшего срока к полному сроку хранения. */
-        long totalDays = ChronoUnit.DAYS.between(createDate, expiryDate);
-        long spentDays = ChronoUnit.DAYS.between(createDate, currentDate);
-        return spentDays * 100D / totalDays;
-    }
-
-    public boolean isExpired(LocalDate currentDate) {
-        return !currentDate.isBefore(expiryDate);
-    }
-
-    public boolean needsDiscount(LocalDate currentDate) {
-        double used = getShelfLifeUsagePercent(currentDate);
-        return used > 75D && !isExpired(currentDate);
+    void setRemainingShelfLife(long remainingShelfLife) {
+        this.remainingShelfLife = Math.max(0, remainingShelfLife);
     }
 
     public void applyDiscount() {
         if (!discounted) {
-            /* Скидка считается от первоначальной цены и применяется только один раз. */
             price = originalPrice * (1 - discount / 100D);
             discounted = true;
         }

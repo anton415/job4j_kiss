@@ -19,8 +19,7 @@ public class Shop extends AbstractStore {
 
     @Override
     protected void prepare(Food food) {
-        /* Просрочки здесь еще нет, но товар уже пора уценять. */
-        if (food.needsDiscount(currentDate())) {
+        if (needsDiscount(food)) {
             food.applyDiscount();
         }
     }
