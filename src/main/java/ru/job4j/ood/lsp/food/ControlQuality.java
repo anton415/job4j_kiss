@@ -1,13 +1,11 @@
 package ru.job4j.ood.lsp.food;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 public class ControlQuality {
     private final List<Store> stores;
-    private final ShelfLifeCalculator shelfLifeCalculator = new ShelfLifeCalculator();
 
     public ControlQuality(List<Store> stores) {
         Objects.requireNonNull(stores, "stores must not be null");
@@ -29,8 +27,8 @@ public class ControlQuality {
 
     public void distribute(List<Food> foods) {
         Objects.requireNonNull(foods, "foods must not be null");
-        LocalDate currentDate = LocalDate.now();
-        foods.forEach(food -> shelfLifeCalculator.usagePercent(food, currentDate));
+        // Убрана жесткая зависимость от LocalDate.now()
+        // распределение опирается только на актуальные правила/дату каждого хранилища.
         List<Food> undistributed = foods;
         for (Store store : stores) {
             undistributed = store.add(undistributed);
@@ -41,6 +39,7 @@ public class ControlQuality {
     }
 
     public void resort() {
+        // Динамическое перераспределение: извлекаем все продукты и раскладываем заново
         List<Food> foods = new ArrayList<>();
         for (Store store : stores) {
             foods.addAll(store.extractAll());
