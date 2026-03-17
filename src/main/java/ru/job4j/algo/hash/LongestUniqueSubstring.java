@@ -2,6 +2,10 @@ package ru.job4j.algo.hash;
 
 import java.util.HashMap;
 
+/**
+ * Вычислительная сложность: O(n) где n - длина строки
+ * Память: O(min(m, n)), где m - размер алфавита, n - длина строки
+ */
 public class LongestUniqueSubstring {
     public static String longestUniqueSubstring(String str) {
         if (str == null || str.isEmpty()) {
@@ -31,7 +35,7 @@ public class LongestUniqueSubstring {
                 bestStart = left;
             }
         }
-        
+
         return str.substring(bestStart, bestStart + bestLength);
     }
 }
