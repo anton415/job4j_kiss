@@ -5,9 +5,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TreeUtilsTest {
 
@@ -46,17 +49,73 @@ class TreeUtilsTest {
 
     @Test
     void checkFindAll() {
-        List<Integer> actual = new ArrayList<>();
-        treeUtils.findAll(tree).forEach(actual::add);
+        List<Integer> actual = toList(treeUtils.findAll(tree));
         actual.sort(Integer::compareTo);
         assertEquals(List.of(
                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16,
                 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31), actual);
 
-        List<Integer> single = new ArrayList<>();
-        treeUtils.findAll(new Node<>(10)).forEach(single::add);
-        assertEquals(List.of(10), single);
-
+        assertEquals(List.of(10), toList(treeUtils.findAll(new Node<>(10))));
         assertThrows(IllegalArgumentException.class, () -> treeUtils.findAll(null));
+    }
+
+    @Test
+    void checkAdd() {
+        Node<Integer> root = new Node<>(1);
+        assertTrue(treeUtils.add(root, 1, 2));
+        assertEquals(List.of(1, 2), toList(treeUtils.findAll(root)));
+        assertEquals(2, treeUtils.countNode(root));
+
+        assertFalse(treeUtils.add(root, 3, 1));
+        assertEquals(List.of(1, 2), toList(treeUtils.findAll(root)));
+        assertEquals(2, treeUtils.countNode(root));
+
+        assertThrows(IllegalArgumentException.class, () -> treeUtils.add(null, 1, 2));
+    }
+
+    @Test
+    void checkFindByKey() {
+        Optional<Node<Integer>> result = treeUtils.findByKey(tree, 2);
+        assertTrue(result.isPresent());
+        assertEquals(15, treeUtils.countNode(result.get()));
+
+        List<Integer> foundValues = toList(treeUtils.findAll(result.get()));
+        foundValues.sort(Integer::compareTo);
+        assertEquals(List.of(2, 4, 5, 8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23), foundValues);
+
+        assertEquals(31, treeUtils.countNode(tree));
+        assertThrows(IllegalArgumentException.class, () -> treeUtils.findByKey(null, 1));
+    }
+
+    @Test
+    void checkDivideTree() {
+        Optional<Node<Integer>> result = treeUtils.divideByKey(tree, 2);
+        assertTrue(result.isPresent());
+        assertEquals(15, treeUtils.countNode(result.get()));
+
+        List<Integer> dividedValues = toList(treeUtils.findAll(result.get()));
+        dividedValues.sort(Integer::compareTo);
+        assertEquals(List.of(2, 4, 5, 8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23), dividedValues);
+
+        assertEquals(16, treeUtils.countNode(tree));
+        List<Integer> rootValues = toList(treeUtils.findAll(tree));
+        for (Integer value : List.of(2, 4, 5, 8, 9, 10, 11, 16, 17, 18, 19, 20, 21, 22, 23)) {
+            assertFalse(rootValues.contains(value));
+        }
+
+        assertThrows(IllegalArgumentException.class, () -> treeUtils.divideByKey(null, 1));
+    }
+
+    @Test
+    void checkDivideRoot() {
+        Optional<Node<Integer>> result = treeUtils.divideByKey(tree, 1);
+        assertTrue(result.isPresent());
+        assertEquals(31, treeUtils.countNode(result.get()));
+    }
+
+    private static <E> List<E> toList(Iterable<E> iterable) {
+        List<E> result = new ArrayList<>();
+        iterable.forEach(result::add);
+        return result;
     }
 }
