@@ -1,11 +1,13 @@
 package ru.job4j.algo.binarytree;
 
-import org.junit.jupiter.api.Test;
-
 import java.lang.reflect.Field;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 class BinarySearchTreeTest {
     @Test
@@ -182,6 +184,41 @@ class BinarySearchTreeTest {
         assertNull(getField(removedNode, "key"));
         assertNull(getField(removedNode, "left"));
         assertNull(getField(removedNode, "right"));
+    }
+
+    @Test
+    void whenClearThenTreeBecomesEmpty() {
+        BinarySearchTree<Integer> tree = new BinarySearchTree<>();
+        for (int element : new int[]{4, 2, 6, 1, 3, 5, 7}) {
+            tree.put(element);
+        }
+        tree.clear();
+        assertEquals(List.of(), tree.inSymmetricalOrder());
+        assertNull(tree.minimum());
+        assertNull(tree.maximum());
+        assertFalse(tree.contains(4));
+    }
+
+    @Test
+    void whenClearThenReferencesAreCleared() throws ReflectiveOperationException {
+        BinarySearchTree<Integer> tree = new BinarySearchTree<>();
+        for (int element : new int[]{4, 2, 6, 1, 3, 5, 7}) {
+            tree.put(element);
+        }
+        var root = getField(tree, "root");
+        var left = getField(root, "left");
+        var right = getField(root, "right");
+        tree.clear();
+        assertNull(getField(tree, "root"));
+        assertNull(getField(root, "key"));
+        assertNull(getField(root, "left"));
+        assertNull(getField(root, "right"));
+        assertNull(getField(left, "key"));
+        assertNull(getField(left, "left"));
+        assertNull(getField(left, "right"));
+        assertNull(getField(right, "key"));
+        assertNull(getField(right, "left"));
+        assertNull(getField(right, "right"));
     }
 
     private Object getField(Object target, String name) throws ReflectiveOperationException {

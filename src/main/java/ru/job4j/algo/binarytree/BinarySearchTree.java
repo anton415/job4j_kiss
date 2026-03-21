@@ -9,6 +9,10 @@ public class BinarySearchTree<T extends Comparable<T>> {
     private Node root;
 
     public boolean put(T key) {
+        // Null-ключ в дерево не добавляем.
+        if (Objects.isNull(key)) {
+            return false;
+        }
         boolean result;
         if (Objects.isNull(root)) {
             root = new Node(key);
@@ -42,6 +46,10 @@ public class BinarySearchTree<T extends Comparable<T>> {
     }
 
     public boolean contains(T key) {
+        // Null-ключ не может находиться в дереве.
+        if (Objects.isNull(key)) {
+            return false;
+        }
         // Ищем узел от корня и проверяем, что результат не null.
         return Objects.nonNull(find(root, key));
     }
@@ -136,6 +144,22 @@ public class BinarySearchTree<T extends Comparable<T>> {
         return PrintTree.getTreeDisplay(root);
     }
 
+    public void clear() {
+        // Очищаем все узлы дерева в post-order, а затем сбрасываем корень.
+        clear(root);
+        root = null;
+    }
+
+    private void clear(Node node) {
+        if (Objects.isNull(node)) {
+            return;
+        }
+        // Сначала очищаем потомков, чтобы не потерять ссылки на поддеревья.
+        clear(node.left);
+        clear(node.right);
+        clearNode(node);
+    }
+
     public boolean remove(T key) {
         boolean result = false;
         if (Objects.nonNull(key) && Objects.nonNull(root)) {
@@ -175,12 +199,13 @@ public class BinarySearchTree<T extends Comparable<T>> {
                 swap(isLeft, source, parent, current, heir);
                 heir.left = current.left;
             }
-            clear(current);
+            clearNode(current);
         }
         return result;
     }
 
-    private void clear(Node node) {
+    private void clearNode(Node node) {
+        // Разрываем все ссылки удаленного узла, чтобы он мог быть собран GC.
         node.key = null;
         node.left = null;
         node.right = null;
